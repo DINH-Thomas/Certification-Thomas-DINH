@@ -1,9 +1,12 @@
-import requests
-import pandas as pd
 import time
 from datetime import datetime
 from pathlib import Path
-from src.config.config import SUBREDDITS, MAX_POSTS_PER_SUBREDDIT, SLEEP_BETWEEN_REQUESTS, OUTPUT_PATH, HEADERS
+
+import pandas as pd
+import requests
+
+from src.config.config import HEADERS, MAX_POSTS_PER_SUBREDDIT, OUTPUT_PATH, SLEEP_BETWEEN_REQUESTS, SUBREDDITS
+
 
 def scrape_subreddit(name: str, max_posts: int = 300) -> list:
     """Scrape posts from a subreddit using Reddit's public .json feed."""
@@ -76,6 +79,7 @@ def all_posts_listed() -> pd.DataFrame:
         all_posts.extend(posts)
     df = pd.DataFrame(all_posts)
     return df
+
 
 def save_posts_to_csv(df: pd.DataFrame, output_path: Path = OUTPUT_PATH):
     """Save the collected posts to a CSV file."""

@@ -1,7 +1,7 @@
 # Création du dossier Certification
 # Création du repo github Certification-Thomas DINH et push d'un premier README pour avoir quelque chose :
 
-echo "# Certification-Thomas-DINH" >> README.md    
+echo "# Certification-Thomas-DINH" >> README.md
 git add README.md
 git commit -m "first commit"
 git branch -M main
@@ -14,13 +14,11 @@ git push -u origin main
 git checkout Thomas
 
 # Création d’un nouvel environnement virtuel et activation de ce dernier.
-pyenv virtualenv 3.11.8 Certification                                                  
-pyenv local Certification  
+pyenv virtualenv 3.11.8 Certification
+pyenv local Certification
 
 # Installation de poetry dans le nouvel environnement
 pip install poetry
 poetry init
 
 # Création du .gitignore
-
-

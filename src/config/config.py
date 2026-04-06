@@ -2,11 +2,6 @@
 
 import json
 import os
-
-import requests
-import pandas as pd
-import time
-from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -56,6 +51,6 @@ def _build_headers() -> dict:
     user_agent = os.getenv("USER_AGENT", "CertificationBot/1.0")
     return {"User-Agent": user_agent}
 
+
 # YOU HAVE TO SET HEADERS IN YOUR .env FILE FIRST, you can type "What is my user agent on Google" and copy paste it.
 HEADERS = _build_headers()
-
