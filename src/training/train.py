@@ -1,12 +1,12 @@
-import joblib
+import sys
 from pathlib import Path
 from typing import Optional
-import sys
 
+import joblib
+import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
-import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from src.config import config
