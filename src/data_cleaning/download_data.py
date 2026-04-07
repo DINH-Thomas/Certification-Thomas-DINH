@@ -1,16 +1,24 @@
-import time
 import os
+import time
 from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
 import requests
-import kagglehub
-
-from src.config.config import HEADERS, MAX_POSTS_PER_SUBREDDIT, OUTPUT_PATH, SLEEP_BETWEEN_REQUESTS, SUBREDDITS, DATA_DIR, DATA_FILENAME, OUTPUT_PATH_PROCESSED
 from dotenv import load_dotenv
 
+from src.config.config import (
+    DATA_DIR,
+    DATA_FILENAME,
+    HEADERS,
+    MAX_POSTS_PER_SUBREDDIT,
+    OUTPUT_PATH,
+    SLEEP_BETWEEN_REQUESTS,
+    SUBREDDITS,
+)
+
 load_dotenv()
+
 
 def download_data_kaggle() -> None:
     """Load the dataset from the Kaggle API.
