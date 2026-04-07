@@ -40,6 +40,13 @@ def clean_data_kaggle(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def add_label0(df: pd.DataFrame) -> pd.DataFrame:
+    """Add a label column to the dataset based on the subreddit.
+    Here we put label = 0 because it is from happy subreddits"""
+    df["label"] = 0
+    return df
+
+
 def clean_data_scrapped(df: pd.DataFrame) -> pd.DataFrame:
     """Change some columns names but it the same function."""
     # Remove duplicates

@@ -10,6 +10,15 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_DIR = PROJECT_ROOT / "data" / "raw"
 BASE_DIR = Path(__file__).resolve().parents[2]
 DATA_FILENAME = "reddit_depression_dataset.csv"
+MODELS_DIR = PROJECT_ROOT / "models"
+VECTORIZER_PATH = MODELS_DIR / "tfidf_vectorizer.pkl"
+# Keep LR model aligned with tfidf_vectorizer.pkl (both 50,000 features).
+LR_MODEL_PATH = MODELS_DIR / "lr_model.pkl"
+DISTILBERT_MODEL_HF_PATH = MODELS_DIR / "distilbert_hf"
+MENTAL_ROBERTA_HF_PATH = MODELS_DIR / "mental_roberta_hf"
+XGBOOST_MODEL_PATH = MODELS_DIR / "xgb_depression_classifier.pkl"
+XGBOOST_VECTORIZER_PATH = MODELS_DIR / "xgb_tfidf_vectorizer.pkl"
+
 load_dotenv(BASE_DIR / ".env")
 load_dotenv(BASE_DIR / "my.env", override=True)
 
@@ -36,7 +45,8 @@ SUBREDDITS = [
 MAX_POSTS_PER_SUBREDDIT = 3000  # increased to target ~15k total
 SLEEP_BETWEEN_REQUESTS = 1  # seconds — be polite to Reddit
 OUTPUT_PATH = Path("../data/raw/happiness_reddit.csv")
-OUTPUT_PATH_PROCESSED = Path("../data/processed/balanced_30k_dataset.csv")
+OUTPUT_PATH_PROCESSED = Path("../data/cleaned/balanced_30k_dataset.csv")
+
 
 def _build_headers() -> dict:
     """Build request headers from env, always returning a dict."""
