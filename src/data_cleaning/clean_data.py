@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 def clean_data_kaggle(df: pd.DataFrame) -> pd.DataFrame:
     """Clean the dataset by removing duplicates, handling missing values,
     and balancing classes."""
@@ -38,13 +39,21 @@ def clean_data_kaggle(df: pd.DataFrame) -> pd.DataFrame:
     df.dropna(inplace=True)
     return df
 
+
+def add_label0(df: pd.DataFrame) -> pd.DataFrame:
+    """Add a label column to the dataset based on the subreddit.
+    Here we put label = 0 because it is from happy subreddits"""
+    df["label"] = 0
+    return df
+
+
 def clean_data_scrapped(df: pd.DataFrame) -> pd.DataFrame:
     """Change some columns names but it the same function."""
     # Remove duplicates
     df = df.drop_duplicates()
     # Remove na_values for those who haven't not a lot of na
     df = df.dropna(
-        subset=["subreddit", "title", "score", "num_comments","created_utc", "label"],
+        subset=["subreddit", "title", "score", "num_comments", "created_utc", "label"],
         axis=0,
     )
     # On drop les colonnes qui ne sont pas utiles

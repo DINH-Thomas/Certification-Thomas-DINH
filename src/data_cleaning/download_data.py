@@ -1,9 +1,52 @@
-import requests
-import pandas as pd
+import os
 import time
 from datetime import datetime
 from pathlib import Path
-from src.config.config import SUBREDDITS, MAX_POSTS_PER_SUBREDDIT, SLEEP_BETWEEN_REQUESTS, OUTPUT_PATH, HEADERS
+
+import pandas as pd
+import requests
+
+from src.config.config import (
+    DATA_DIR,
+    DATA_FILENAME,
+    HEADERS,
+    KAGGLE_KEY,
+    KAGGLE_USERNAME,
+    MAX_POSTS_PER_SUBREDDIT,
+    OUTPUT_PATH,
+    SLEEP_BETWEEN_REQUESTS,
+    SUBREDDITS,
+)
+
+
+def download_data_kaggle() -> None:
+    """Load the dataset from the Kaggle API.
+    KAGGLE_USERNAME and KAGGLE_KEY MUST BE SET IN YOUR .env FILE !!!!!!"""
+    from kaggle.api.kaggle_api_extended import KaggleApi
+
+    # Inject credentials loaded in config into process env for kaggle package.
+    os.environ["KAGGLE_USERNAME"] = KAGGLE_USERNAME
+    os.environ["KAGGLE_KEY"] = KAGGLE_KEY
+
+    if not os.environ["KAGGLE_USERNAME"] or not os.environ["KAGGLE_KEY"]:
+        raise ValueError("KAGGLE_USERNAME ou KAGGLE_KEY manquant dans le .env")
+
+    # Initialiser et authentifier l'API
+    api = KaggleApi()
+    api.authenticate()
+
+    expected_file = DATA_DIR / DATA_FILENAME
+
+    if expected_file.exists():
+        print("Dataset déjà téléchargé, téléchargement ignoré.")
+    else:
+        api.dataset_download_files(
+            "rishabhkausish/reddit-depression-dataset",
+            path=str(DATA_DIR),
+            unzip=True,
+        )
+        print("Dataset téléchargé.")
+
 
 def scrape_subreddit(name: str, max_posts: int = 300) -> list:
     """Scrape posts from a subreddit using Reddit's public .json feed."""
@@ -76,6 +119,7 @@ def all_posts_listed() -> pd.DataFrame:
         all_posts.extend(posts)
     df = pd.DataFrame(all_posts)
     return df
+
 
 def save_posts_to_csv(df: pd.DataFrame, output_path: Path = OUTPUT_PATH):
     """Save the collected posts to a CSV file."""
