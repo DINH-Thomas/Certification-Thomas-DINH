@@ -1,0 +1,15 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+ENV PYTHONPATH=/app
+COPY requirements.api.txt .
+# Install CPU-only PyTorch first to avoid ~1.5GB of unused CUDA libraries (Cloud Run has no GPU)
+RUN pip install --no-cache-dir torch==2.10.0 --index-url https://download.pytorch.org/whl/cpu
+RUN pip install --no-cache-dir -r requirements.api.txt
+RUN python -m nltk.downloader stopwords wordnet averaged_perceptron_tagger averaged_perceptron_tagger_eng punkt punkt_tab
+COPY src/ ./src/
+COPY models/ ./models/
+
+EXPOSE 8000
+
+CMD ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
