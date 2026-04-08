@@ -1,12 +1,14 @@
 from contextlib import asynccontextmanager
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.database import get_stats, init_db, log_prediction
 from src.api.schemas import ExplainRequest, ExplainResponse, PredictionRequest, PredictionResponse, StatsResponse
 from src.api.services import _risk_level
 from src.api.services import explain as explain_service
 from src.api.services import predict as predict_service
+from src.config import config
 
 
 @asynccontextmanager
@@ -21,6 +23,15 @@ app = FastAPI(
     description="API for detecting mental health signals in text using machine learning models.",
     version="1.0.0",
     lifespan=lifespan,
+)
+
+allow_all_origins = "*" in config.CORS_ALLOWED_ORIGINS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"] if allow_all_origins else config.CORS_ALLOWED_ORIGINS,
+    allow_credentials=not allow_all_origins,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
