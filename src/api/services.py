@@ -6,9 +6,9 @@ import joblib
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-import src.common.config as config
+import src.config.config as config
 import src.training.predict as predictor
-from src.common.gdrive_loader import ensure_models
+from src.config.gdrive_loader import ensure_models
 from src.training.preprocess import preprocess_text
 
 _lr_model = None  # Lazy load the LR model when needed
@@ -172,14 +172,7 @@ def _mental_roberta_word_importance(text: str, max_tokens: int = 40) -> dict[str
 
 def _transformer_word_importance(model: Any, tokenizer: Any, text: str, max_tokens: int = 40) -> dict[str, float]:
     """Compute word importance from a transformer classifier using gradient x input."""
-    preprocessed_text = preprocess_text(text)
-
-    encoded = tokenizer(
-        preprocessed_text,
-        return_tensors="pt",
-        truncation=True,
-        max_length=512,
-    )
+    encoded = tokenizer(text, return_tensors="pt")
     input_ids = encoded["input_ids"]
     attention_mask = encoded.get("attention_mask")
 

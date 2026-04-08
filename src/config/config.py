@@ -47,6 +47,14 @@ SLEEP_BETWEEN_REQUESTS = 1  # seconds — be polite to Reddit
 OUTPUT_PATH = Path("../data/raw/happiness_reddit.csv")
 OUTPUT_PATH_PROCESSED = Path("../data/cleaned/balanced_30k_dataset.csv")
 
+# Environment-backed runtime settings
+GDRIVE_MODEL_FOLDER_ID = os.getenv("GDRIVE_MODEL_FOLDER_ID", "")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./predictions.db")
+API_URL = os.getenv("API_URL", "http://localhost:8000")
+API_URL_LOCAL = os.getenv("API_URL_LOCAL", "http://127.0.0.1:8000")
+KAGGLE_USERNAME = os.getenv("KAGGLE_USERNAME", "")
+KAGGLE_KEY = os.getenv("KAGGLE_KEY", "")
+
 
 def _build_headers() -> dict:
     """Build request headers from env, always returning a dict."""

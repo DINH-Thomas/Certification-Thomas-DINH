@@ -2,9 +2,11 @@ from contextlib import asynccontextmanager
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 
-import src.api.services as services
 from src.api.database import get_stats, init_db, log_prediction
 from src.api.schemas import ExplainRequest, ExplainResponse, PredictionRequest, PredictionResponse, StatsResponse
+from src.api.services import _risk_level
+from src.api.services import explain as explain_service
+from src.api.services import predict as predict_service
 
 
 @asynccontextmanager
@@ -20,16 +22,6 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
-
-_RISK_THRESHOLDS = (0.33, 0.66)
-
-
-def _risk_level(probability: float) -> str:
-    if probability < _RISK_THRESHOLDS[0]:
-        return "low"
-    if probability < _RISK_THRESHOLDS[1]:
-        return "medium"
-    return "high"
 
 
 @app.get("/")
@@ -55,7 +47,7 @@ def health_check():
 @app.post("/predict")
 def predict(request: PredictionRequest, background_tasks: BackgroundTasks) -> PredictionResponse:
     """Endpoint to predict mental health signals from input text."""
-    result = services.predict(request.text, request.model_type)
+    result = predict_service(request.text, request.model_type)
     background_tasks.add_task(
         log_prediction,
         request.text,
@@ -71,7 +63,7 @@ def predict(request: PredictionRequest, background_tasks: BackgroundTasks) -> Pr
 def explain(request: ExplainRequest) -> ExplainResponse:
     """Endpoint to predict and return word-level explanation details."""
     try:
-        result = services.explain(
+        result = explain_service(
             text=request.text,
             model_type=request.model_type,
             threshold=request.threshold,

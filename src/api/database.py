@@ -1,14 +1,12 @@
 import hashlib
-import os
 from datetime import datetime, timedelta, timezone
 
-from dotenv import load_dotenv
 from sqlalchemy import Column, DateTime, Float, Integer, String, create_engine, func, select
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-load_dotenv()
+from src.config import config
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./predictions.db")
+DATABASE_URL = config.DATABASE_URL
 
 if DATABASE_URL.startswith("sqlite"):
     # Local dev: SQLite — disable pooling (avoids thread-safety issues with file locks)
