@@ -5,19 +5,18 @@ from pathlib import Path
 
 import pandas as pd
 import requests
-from dotenv import load_dotenv
 
 from src.config.config import (
     DATA_DIR,
     DATA_FILENAME,
     HEADERS,
+    KAGGLE_KEY,
+    KAGGLE_USERNAME,
     MAX_POSTS_PER_SUBREDDIT,
     OUTPUT_PATH,
     SLEEP_BETWEEN_REQUESTS,
     SUBREDDITS,
 )
-
-load_dotenv()
 
 
 def download_data_kaggle() -> None:
@@ -25,9 +24,9 @@ def download_data_kaggle() -> None:
     KAGGLE_USERNAME and KAGGLE_KEY MUST BE SET IN YOUR .env FILE !!!!!!"""
     from kaggle.api.kaggle_api_extended import KaggleApi
 
-    # Injecter les credentials depuis le .env dans les variables d'environnement
-    os.environ["KAGGLE_USERNAME"] = os.getenv("KAGGLE_USERNAME", "")
-    os.environ["KAGGLE_KEY"] = os.getenv("KAGGLE_KEY", "")
+    # Inject credentials loaded in config into process env for kaggle package.
+    os.environ["KAGGLE_USERNAME"] = KAGGLE_USERNAME
+    os.environ["KAGGLE_KEY"] = KAGGLE_KEY
 
     if not os.environ["KAGGLE_USERNAME"] or not os.environ["KAGGLE_KEY"]:
         raise ValueError("KAGGLE_USERNAME ou KAGGLE_KEY manquant dans le .env")

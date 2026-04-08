@@ -1,12 +1,11 @@
-import os
 import sys
 from pathlib import Path
 
 import requests
 import streamlit as st
-from dotenv import load_dotenv
 
 try:
+    from src.config import config
     from src.dashboard.about import render_about_page
     from src.dashboard.pages import render_models_board_page, render_prediction_page, render_word_importance_page
     from src.dashboard.stats import render_stats_page
@@ -15,13 +14,13 @@ except ModuleNotFoundError:
     project_root = Path(__file__).resolve().parents[2]
     if str(project_root) not in sys.path:
         sys.path.insert(0, str(project_root))
+    from src.config import config
     from src.dashboard.about import render_about_page
     from src.dashboard.pages import render_models_board_page, render_prediction_page, render_word_importance_page
     from src.dashboard.stats import render_stats_page
 
-load_dotenv()
-API_URL = os.getenv("API_URL", "http://localhost:8000")
-API_URL_LOCAL = os.getenv("API_URL_LOCAL", "http://127.0.0.1:8000")
+API_URL = config.API_URL
+API_URL_LOCAL = config.API_URL_LOCAL
 
 
 def _inject_theme() -> None:
@@ -462,7 +461,7 @@ def main() -> None:
             </div>
             <div style="font-size:0.78rem;color:#bad7eb;line-height:1.8;">
                 Aïmen El Abidi<br/>
-                Thomas Dihn<br/>
+                Thomas Dinh<br/>
                 Stanislav Grinchenko<br/>
                 Fabrice Moncaut
             </div>
