@@ -1,0 +1,43 @@
+# Git
+.git
+.gitignore
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env
+
+# Tests
+tests/
+
+# Data (raw/processed datasets, not needed at runtime)
+data/
+predictions.db
+
+# Notebooks
+*.ipynb
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Scripts (training/download scripts, not needed at runtime)
+scripts/
+notebooks/
+
+# Docs
+*.md
+docs/
