@@ -13,6 +13,52 @@ from nltk.tokenize import word_tokenize
 
 _NEGATION_WORDS = {"no", "not", "nor", "never", "n't"}
 _STOP_WORDS = None
+_FALLBACK_STOP_WORDS = {
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "but",
+    "by",
+    "for",
+    "from",
+    "has",
+    "have",
+    "he",
+    "her",
+    "his",
+    "i",
+    "if",
+    "in",
+    "into",
+    "is",
+    "it",
+    "its",
+    "me",
+    "my",
+    "of",
+    "on",
+    "or",
+    "our",
+    "she",
+    "so",
+    "that",
+    "the",
+    "their",
+    "them",
+    "they",
+    "this",
+    "to",
+    "us",
+    "we",
+    "were",
+    "with",
+    "you",
+    "your",
+}
 
 _LEMMATIZER = WordNetLemmatizer()
 
@@ -48,7 +94,10 @@ def _get_stop_words() -> set:
     """
     global _STOP_WORDS
     if _STOP_WORDS is None:
-        _STOP_WORDS = set(stopwords.words("english")) - _NEGATION_WORDS
+        try:
+            _STOP_WORDS = set(stopwords.words("english")) - _NEGATION_WORDS
+        except LookupError:
+            _STOP_WORDS = _FALLBACK_STOP_WORDS - _NEGATION_WORDS
     return _STOP_WORDS
 
 

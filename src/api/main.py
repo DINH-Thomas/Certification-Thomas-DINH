@@ -9,11 +9,13 @@ from src.api.services import _risk_level
 from src.api.services import explain as explain_service
 from src.api.services import predict as predict_service
 from src.config import config
+from src.config.gdrive_loader import ensure_models  # adapte le chemin si besoin
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialise DB tables on startup."""
+    """Initialise DB tables et télécharge les modèles au démarrage."""
+    ensure_models(config.MODELS_DIR, config.GDRIVE_MODEL_FOLDER_ID)
     init_db()
     yield
 
@@ -58,7 +60,10 @@ def health_check():
 @app.post("/predict")
 def predict(request: PredictionRequest, background_tasks: BackgroundTasks) -> PredictionResponse:
     """Endpoint to predict mental health signals from input text."""
-    result = predict_service(request.text, request.model_type)
+    try:
+        result = predict_service(request.text, request.model_type)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     background_tasks.add_task(
         log_prediction,
         request.text,

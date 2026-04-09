@@ -86,6 +86,9 @@ def _get_xgboost_artifacts():
 def predict(text: str, model_type: str = "lr") -> dict:
     """Predict the probability of a mental health signal
     in the given text using the specified model type."""
+    if not text or not text.strip():
+        raise ValueError("text must not be empty")
+
     if model_type == "lr":
         lr_model, lr_vectorizer = _get_lr_artifacts()
         return predictor.lr_predict(lr_model, lr_vectorizer, text)
