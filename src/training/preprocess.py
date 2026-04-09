@@ -119,6 +119,14 @@ def _wordnet_pos(treebank_tag: str) -> str:
     return "n"
 
 
+def _lemmatize_token(token: str, pos_tag: str) -> str:
+    """Lemmatize a token, falling back to the original token if WordNet data is unavailable."""
+    try:
+        return _LEMMATIZER.lemmatize(token, _wordnet_pos(pos_tag))
+    except LookupError:
+        return token
+
+
 def _normalize_text(text: str) -> str:
     """
     Clean and normalize the input text by:
@@ -223,6 +231,6 @@ def preprocess_text(
             pos_tags = nltk.pos_tag(tokens)
         except LookupError:
             pos_tags = [(t, "N") for t in tokens]
-        tokens = [_LEMMATIZER.lemmatize(t, _wordnet_pos(pos)) for t, pos in pos_tags]
+        tokens = [_lemmatize_token(t, pos) for t, pos in pos_tags]
 
     return " ".join(tokens)
