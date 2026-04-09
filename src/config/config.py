@@ -50,9 +50,10 @@ OUTPUT_PATH_PROCESSED = Path("../data/cleaned/balanced_30k_dataset.csv")
 # Environment-backed runtime settings
 GDRIVE_MODEL_FOLDER_ID = os.getenv("GDRIVE_MODEL_FOLDER_ID", "")
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./predictions.db")
-#Pour lire l'API_URL depuis Streamlit secrets, sinon fallback à l'env ou localhost
+# Pour lire l'API_URL depuis Streamlit secrets, sinon fallback à l'env ou localhost
 try:
     import streamlit as st
+
     if hasattr(st, "secrets") and "API_URL" in st.secrets:
         API_URL = st.secrets["API_URL"]
     else:
