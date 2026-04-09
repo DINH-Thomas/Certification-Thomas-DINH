@@ -371,21 +371,12 @@ def _is_api_reachable(api_url: str) -> bool:
 
 
 def _resolve_api_url() -> str:
-<<<<<<< HEAD
     """Use the first reachable endpoint from local and remote candidates."""
     candidates = [
-        API_URL_LOCAL,
-        "http://127.0.0.1:8000",
-        "http://localhost:8000",
-        API_URL,
-=======
-    """Use the first reachable endpoint, preferring explicit env URLs."""
-    candidates = [
         API_URL,
         API_URL_LOCAL,
         "http://127.0.0.1:8000",
         "http://localhost:8000",
->>>>>>> origin/Thomas
     ]
     unique_candidates = list(dict.fromkeys(url.strip() for url in candidates if url and url.strip()))
 
@@ -393,11 +384,7 @@ def _resolve_api_url() -> str:
         if _is_api_reachable(url):
             return url
 
-<<<<<<< HEAD
     return API_URL_LOCAL  # On laisse comme ça pour l'instant
-=======
-    return API_URL if API_URL and API_URL.strip() else API_URL_LOCAL
->>>>>>> origin/Thomas
 
 
 def main() -> None:
