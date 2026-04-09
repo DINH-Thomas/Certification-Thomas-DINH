@@ -1,7 +1,6 @@
 from unittest.mock import Mock
 
 import numpy as np
-import pytest
 
 from src.training import predict as predict_module
 
@@ -21,8 +20,9 @@ def test_lr_predict():
 
 def test_distilbert_predict():
     """distilbert_predict returns dict with label (0/1) and probability (0-1)."""
-    import torch
     from types import SimpleNamespace
+
+    import torch
 
     model = Mock()
     model.parameters.return_value = iter([torch.tensor([1.0])])
@@ -58,8 +58,9 @@ def test_xgboost_predict():
 
 def test_mental_roberta_predict():
     """mental_roberta_predict returns dict with label (0/1) and probability (0-1)."""
-    import torch
     from types import SimpleNamespace
+
+    import torch
 
     model = Mock()
     model.parameters.return_value = iter([torch.tensor([1.0])])
