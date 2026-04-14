@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir -r requirements.api.txt
 RUN python -m nltk.downloader stopwords wordnet averaged_perceptron_tagger averaged_perceptron_tagger_eng punkt punkt_tab
 
 COPY src/ ./src/
-COPY models/ ./models/
+RUN mkdir -p /app/models
 
 EXPOSE 8000
 CMD ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
