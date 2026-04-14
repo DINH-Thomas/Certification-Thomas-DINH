@@ -13,6 +13,52 @@ from nltk.tokenize import word_tokenize
 
 _NEGATION_WORDS = {"no", "not", "nor", "never", "n't"}
 _STOP_WORDS = None
+_FALLBACK_STOP_WORDS = {
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "but",
+    "by",
+    "for",
+    "from",
+    "has",
+    "have",
+    "he",
+    "her",
+    "his",
+    "i",
+    "if",
+    "in",
+    "into",
+    "is",
+    "it",
+    "its",
+    "me",
+    "my",
+    "of",
+    "on",
+    "or",
+    "our",
+    "she",
+    "so",
+    "that",
+    "the",
+    "their",
+    "them",
+    "they",
+    "this",
+    "to",
+    "us",
+    "we",
+    "were",
+    "with",
+    "you",
+    "your",
+}
 
 _LEMMATIZER = WordNetLemmatizer()
 
@@ -48,7 +94,10 @@ def _get_stop_words() -> set:
     """
     global _STOP_WORDS
     if _STOP_WORDS is None:
-        _STOP_WORDS = set(stopwords.words("english")) - _NEGATION_WORDS
+        try:
+            _STOP_WORDS = set(stopwords.words("english")) - _NEGATION_WORDS
+        except LookupError:
+            _STOP_WORDS = _FALLBACK_STOP_WORDS - _NEGATION_WORDS
     return _STOP_WORDS
 
 
@@ -68,6 +117,14 @@ def _wordnet_pos(treebank_tag: str) -> str:
     if treebank_tag.startswith("R"):
         return "r"
     return "n"
+
+
+def _lemmatize_token(token: str, pos_tag: str) -> str:
+    """Lemmatize a token, falling back to the original token if WordNet data is unavailable."""
+    try:
+        return _LEMMATIZER.lemmatize(token, _wordnet_pos(pos_tag))
+    except LookupError:
+        return token
 
 
 def _normalize_text(text: str) -> str:
@@ -174,6 +231,6 @@ def preprocess_text(
             pos_tags = nltk.pos_tag(tokens)
         except LookupError:
             pos_tags = [(t, "N") for t in tokens]
-        tokens = [_LEMMATIZER.lemmatize(t, _wordnet_pos(pos)) for t, pos in pos_tags]
+        tokens = [_lemmatize_token(t, pos) for t, pos in pos_tags]
 
     return " ".join(tokens)
