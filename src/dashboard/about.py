@@ -30,10 +30,10 @@ _MODELS = [
             "with tuned hyperparameters from grid search."
         ),
         "training_data": "30 K balanced samples",
-        "accuracy": "0.91",
-        "precision": "0.73",
-        "recall": "0.87",
-        "f1": "0.80",
+        "accuracy": "0.89",
+        "precision": "0.84",
+        "recall": "0.97",
+        "f1": "0.90",
         "speed": "< 10 ms",
         "explainability": "Partial (feature importance)",
     },
@@ -261,10 +261,10 @@ def render_about_page() -> None:
     df = pd.DataFrame(
         {
             "Model": ["Logistic Regression", "XGBoost", "DistilBERT", "MentalRoBERTa"],
-            "Accuracy": [0.93, 0.91, 0.96, 0.96],
-            "Precision": [0.93, 0.73, 0.94, 0.96],
-            "Recall": [0.92, 0.87, 0.97, 0.97],
-            "F1": [0.93, 0.80, 0.96, 0.96],
+            "Accuracy": [0.93, 0.89, 0.96, 0.96],
+            "Precision": [0.93, 0.84, 0.94, 0.96],
+            "Recall": [0.92, 0.97, 0.97, 0.97],
+            "F1": [0.93, 0.90, 0.96, 0.96],
             "Training samples": ["30 K", "30 K", "30 K", "21 K"],
             "Latency": ["< 5 ms", "< 10 ms", "200–400 ms", "200–400 ms"],
         }
@@ -285,37 +285,3 @@ def render_about_page() -> None:
         columns=["Dataset", "Class", "Size", "Notes"],
     )
     st.dataframe(df_data, use_container_width=True, hide_index=True)
-
-    # ── Key insights ──────────────────────────────────────────────────────────
-    st.markdown("<br/>", unsafe_allow_html=True)
-    st.markdown('<p class="section-title">Key insights</p>', unsafe_allow_html=True)
-
-    c1, c2 = st.columns(2)
-    with c1:
-        st.markdown(
-            """
-            <div style="background:rgba(8,28,52,0.7); border:1px solid rgba(66,216,240,0.2);
-                        border-radius:0.4rem; padding:1rem; font-size:0.88rem; color:#bad7eb;">
-                <b style="color:#42d8f0;">Why domain pretraining matters</b><br/><br/>
-                MentalRoBERTa was pretrained on mental health corpora before fine-tuning.
-                This gives it vocabulary and representations tuned to clinical and
-                self-disclosure language — resulting in the best precision (0.84 vs 0.75 for
-                standard DistilBERT on the old dataset), meaning fewer false alarms.
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    with c2:
-        st.markdown(
-            """
-            <div style="background:rgba(8,28,52,0.7); border:1px solid rgba(66,216,240,0.2);
-                        border-radius:0.4rem; padding:1rem; font-size:0.88rem; color:#bad7eb;">
-                <b style="color:#42d8f0;">Context vs keywords</b><br/><br/>
-                LR predicts "I'm depressed" → 98 % (keyword overfit on <i>depressed</i>).
-                DistilBERT predicts the same phrase → 0.4 % (context-aware: casual statement,
-                not clinical distress). But both correctly score "I want to kill myself" → > 98 %.
-                Transformers understand what you mean, not just what you say.
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
