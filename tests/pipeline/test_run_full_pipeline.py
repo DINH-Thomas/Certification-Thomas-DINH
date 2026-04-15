@@ -3,7 +3,7 @@ import pandas as pd
 from src.pipeline import run_full_pipeline
 
 
-def test_run_pipeline_happy_path(monkeypatch):
+def test_run_pipeline_happy_path(monkeypatch, tmp_path):
     """
     Test the full pipeline execution with typical data.
     """
@@ -37,6 +37,11 @@ def test_run_pipeline_happy_path(monkeypatch):
             "label": [1, 1, 0, 0],
         }
     )
+
+    kaggle_csv = tmp_path / "reddit_depression_dataset.csv"
+    kaggle_csv.write_text("placeholder", encoding="utf-8")
+    monkeypatch.setattr(run_full_pipeline.config, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(run_full_pipeline.config, "DATA_FILENAME", kaggle_csv.name)
 
     monkeypatch.setattr(run_full_pipeline.download_data, "download_data_kaggle", lambda: None)
     monkeypatch.setattr(run_full_pipeline.pd, "read_csv", lambda _: kaggle_df)
@@ -80,9 +85,14 @@ def test_run_pipeline_happy_path(monkeypatch):
     assert result["xgboost"]["f1_score"] == 0.83
 
 
-def test_run_pipeline_overrides_and_restores_max_posts(monkeypatch):
+def test_run_pipeline_overrides_and_restores_max_posts(monkeypatch, tmp_path):
     """Test that run_pipeline temporarily overrides MAX_POSTS_PER_SUBREDDIT and restores it after execution."""
     original_value = run_full_pipeline.download_data.MAX_POSTS_PER_SUBREDDIT
+
+    kaggle_csv = tmp_path / "reddit_depression_dataset.csv"
+    kaggle_csv.write_text("placeholder", encoding="utf-8")
+    monkeypatch.setattr(run_full_pipeline.config, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(run_full_pipeline.config, "DATA_FILENAME", kaggle_csv.name)
 
     monkeypatch.setattr(run_full_pipeline.download_data, "download_data_kaggle", lambda: None)
     monkeypatch.setattr(
@@ -153,9 +163,14 @@ def test_run_pipeline_overrides_and_restores_max_posts(monkeypatch):
     assert run_full_pipeline.download_data.MAX_POSTS_PER_SUBREDDIT == original_value
 
 
-def test_run_pipeline_raises_on_empty_scraping(monkeypatch):
+def test_run_pipeline_raises_on_empty_scraping(monkeypatch, tmp_path):
     """
     Test that run_pipeline raises a ValueError when scraping returns an empty dataframe."""
+    kaggle_csv = tmp_path / "reddit_depression_dataset.csv"
+    kaggle_csv.write_text("placeholder", encoding="utf-8")
+    monkeypatch.setattr(run_full_pipeline.config, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(run_full_pipeline.config, "DATA_FILENAME", kaggle_csv.name)
+
     monkeypatch.setattr(run_full_pipeline.download_data, "download_data_kaggle", lambda: None)
     monkeypatch.setattr(
         run_full_pipeline.pd,
