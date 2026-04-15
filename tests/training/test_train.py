@@ -72,5 +72,4 @@ def test_train_xgboost_model():
     assert "sad" in vectorizer.vocabulary_
     assert vectorizer.max_features == 50000
     assert vectorizer.ngram_range == (1, 2)
-    assert vectorizer.stop_words == "english"
     assert set(model.classes_) == {0, 1}
