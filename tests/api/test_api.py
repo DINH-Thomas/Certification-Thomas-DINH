@@ -9,19 +9,15 @@ Tests cover:
 - Database logging functionality
 """
 
-import json
-from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
-
-import pytest
-from fastapi.testclient import TestClient
-
 # Ensure project root is in path for imports
 import sys
+from pathlib import Path
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from src.api.schemas import ExplainRequest, PredictionRequest, PredictionResponse
+from src.api.schemas import PredictionResponse
 
 
 @pytest.fixture

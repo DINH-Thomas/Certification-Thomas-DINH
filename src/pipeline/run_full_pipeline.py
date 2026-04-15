@@ -26,10 +26,7 @@ from src.training.train import prepare_data, save_artifacts, train_log_model, tr
 def _format_metrics(metrics: dict) -> str:
     """Render the metric subset requested by the user."""
     return (
-        f"accuracy={metrics['accuracy']:.4f} | "
-        f"precision={metrics['precision']:.4f} | "
-        f"recall={metrics['recall']:.4f} | "
-        f"f1={metrics['f1_score']:.4f}"
+        f"accuracy={metrics['accuracy']:.4f} | precision={metrics['precision']:.4f} | recall={metrics['recall']:.4f} | f1={metrics['f1_score']:.4f}"
     )
 
 

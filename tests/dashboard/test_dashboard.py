@@ -16,7 +16,7 @@ Current approach focuses on:
 
 import sys
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -199,26 +199,6 @@ class TestDashboardAPIIntegration:
         data = response.json()
         assert "total_predictions" in data
         assert "distress_count" in data
-
-
-class TestDashboardStateManagement:
-    """Conceptual tests for Streamlit session state management."""
-
-    def test_session_state_initialization(self):
-        """Test that critical session state keys are initialized."""
-        # In a real Streamlit app, session_state is managed by Streamlit
-        # This test verifies the expected keys
-        expected_keys = {
-            "predict_text",
-            "predict_model",
-            "explain_sentence",
-            "explain_model",
-        }
-        # This would be verified in integration tests with actual Streamlit
-
-    def test_session_state_text_persistence(self):
-        """Test that user text persists across reruns (conceptual)."""
-        # Streamlit handles this automatically, but we verify the pattern
 
 
 class TestDashboardDataFormatting:
@@ -428,7 +408,7 @@ class TestDashboardConceptualIntegration:
 @pytest.mark.streamlit_integration
 class TestStreamlitUIComponents:
     """Tests for Streamlit UI components (requires running app).
-    
+
     Run with: pytest -m streamlit_integration
     """
 

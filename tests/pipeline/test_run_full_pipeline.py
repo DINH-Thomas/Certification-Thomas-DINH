@@ -4,6 +4,9 @@ from src.pipeline import run_full_pipeline
 
 
 def test_run_pipeline_happy_path(monkeypatch):
+    """
+    Test the full pipeline execution with typical data.
+    """
     kaggle_df = pd.DataFrame(
         {
             "Unnamed: 0": ["1", "2"],
@@ -63,6 +66,7 @@ def test_run_pipeline_happy_path(monkeypatch):
     monkeypatch.setattr(run_full_pipeline, "save_artifacts", lambda *args, **kwargs: None)
 
     def fake_eval(model, vectorizer, X, y):
+        """Return fake evaluation metrics based on the model type."""
         if model is lr_model:
             return {"accuracy": 0.9, "precision": 0.91, "recall": 0.92, "f1_score": 0.93, "classification_report": "lr"}
         return {"accuracy": 0.8, "precision": 0.81, "recall": 0.82, "f1_score": 0.83, "classification_report": "xgb"}
@@ -77,6 +81,7 @@ def test_run_pipeline_happy_path(monkeypatch):
 
 
 def test_run_pipeline_overrides_and_restores_max_posts(monkeypatch):
+    """Test that run_pipeline temporarily overrides MAX_POSTS_PER_SUBREDDIT and restores it after execution."""
     original_value = run_full_pipeline.download_data.MAX_POSTS_PER_SUBREDDIT
 
     monkeypatch.setattr(run_full_pipeline.download_data, "download_data_kaggle", lambda: None)
@@ -149,6 +154,8 @@ def test_run_pipeline_overrides_and_restores_max_posts(monkeypatch):
 
 
 def test_run_pipeline_raises_on_empty_scraping(monkeypatch):
+    """
+    Test that run_pipeline raises a ValueError when scraping returns an empty dataframe."""
     monkeypatch.setattr(run_full_pipeline.download_data, "download_data_kaggle", lambda: None)
     monkeypatch.setattr(
         run_full_pipeline.pd,

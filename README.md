@@ -101,7 +101,7 @@ Pour un lancement étape par étape, il est également possible d'ouvrir le note
 
 ### DistilBERT et MentalRoBERTa
 
-Les deux modèles ont été volontairement exclus de la pipeline principale par leur coût et temps de calcul, il est fortement recommandé de juste les télécharger dans le dossier models du Drive fourni ou alors d'exécuter individuellement les notebooks distilbert et mental_roberta sur Colab en ayant pris soin de télécharger en amont le dataset dans votre Drive et mis dans le bon dossier ou de changer le path lors de la lecture du csv. 
+Les deux modèles ont été volontairement exclus de la pipeline principale par leur coût et temps de calcul, il est fortement recommandé de juste les télécharger dans le dossier models du Drive fourni ou alors d'exécuter individuellement les notebooks distilbert et mental_roberta sur Colab en ayant pris soin de télécharger en amont le dataset dans votre Drive et mis dans le bon dossier ou de changer le path lors de la lecture du csv.
 
 ### Lancement avec Docker
 - Lancer les services: `docker compose up --build`
@@ -150,4 +150,3 @@ Spécifiez le dossier pour des tests ciblés.
 
 **Pipeline**
 - Orchestration de la pipeline complète
-
