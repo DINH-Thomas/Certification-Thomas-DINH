@@ -79,8 +79,8 @@ def _fake_stats() -> dict:
 def client(monkeypatch):
     """FastAPI test client with SQLite in-memory database."""
     # Now safe to import after DATABASE_URL is set
-    from src.api.database import Base, engine, init_db
     from src.api import main
+    from src.api.database import Base, engine, init_db
 
     monkeypatch.setattr(main, "ensure_models", lambda *args, **kwargs: None)
     monkeypatch.setattr(main, "init_db", lambda: None)

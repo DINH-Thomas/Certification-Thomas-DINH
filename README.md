@@ -97,11 +97,13 @@ Important:
 - Vérifier que `KAGGLE_USERNAME` et `KAGGLE_KEY` sont définis dans `.env`.
 - Vérifier que `HEADERS` (ou `USER_AGENT`) est défini dans `.env` pour Reddit.
 
-Pour un lancement étape par étape, il est également possible d'ouvrir le notebooks full_pipeline.ipynb dans le dossier notebooks qui réalise la même chose.
+Pour un lancement par modèle, il est également possible d'ouvrir chaque notebook ayant le nom du modèle voulu en ayant pris soin de télécharger au préalable les données mises dans un dossier data/cleaned.
 
 ### DistilBERT et MentalRoBERTa
 
-Les deux modèles ont été volontairement exclus de la pipeline principale par leur coût et temps de calcul, il est fortement recommandé de juste les télécharger dans le dossier models du Drive fourni ou alors d'exécuter individuellement les notebooks distilbert et mental_roberta sur Colab en ayant pris soin de télécharger en amont le dataset dans votre Drive et mis dans le bon dossier ou de changer le path lors de la lecture du csv.
+Les deux modèles ont été volontairement exclus de la pipeline principale par leur coût et temps de calcul, il est fortement recommandé de juste les télécharger dans le dossier models du Drive fourni ou alors d'exécuter individuellement les notebooks distilbert et mental_roberta sur Colab en ayant pris soin de télécharger en amont le dataset dans votre Google Drive et mis dans le bon dossier ou de changer le path lors de la lecture du csv.
+
+!!! Il faut avoir au préalable demandé l'accès aux modèles sur HuggingFace avant de lancer les notebooks. !!!
 
 ### Lancement avec Docker
 - Lancer les services: `docker compose up --build`

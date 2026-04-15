@@ -57,7 +57,7 @@ def train_xgboost_model(X_train, y_train, model_factory=None) -> tuple:
     - Uses tuned XGBoost hyperparameters from grid search.
     - Optional model_factory is provided for lightweight tests without importing xgboost.
     """
-    vectorizer = TfidfVectorizer(max_features=10000, ngram_range=(1, 2), stop_words="english")
+    vectorizer = TfidfVectorizer(max_features=50000, ngram_range=(1, 2))
     X_train_tfidf = vectorizer.fit_transform(X_train)
 
     if model_factory is None:
