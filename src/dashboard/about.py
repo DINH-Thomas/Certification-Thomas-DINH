@@ -136,25 +136,6 @@ def render_about_page() -> None:
         unsafe_allow_html=True,
     )
 
-    st.markdown(
-        """
-        <div style="
-            background: rgba(255,180,0,0.08);
-            border-left: 4px solid #f0a500;
-            border-radius: 0 0.4rem 0.4rem 0;
-            padding: 0.75rem 1rem;
-            margin-bottom: 1.6rem;
-            color: #f5dfa0;
-            font-size: 0.9rem;
-        ">
-            ⚠️ <b>This is not a clinical tool.</b> It is an early-warning smoke detector —
-            designed to flag potential risk, not to diagnose. Always defer to qualified
-            mental health professionals.
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
     # ── Model cards ──────────────────────────────────────────────────────────
     st.markdown('<p class="section-title">The models</p>', unsafe_allow_html=True)
     col_a, col_b = st.columns(2)
@@ -186,10 +167,6 @@ def render_about_page() -> None:
     ).set_index("Model")
 
     st.dataframe(df, use_container_width=True)
-    st.caption(
-        "All metrics on the held-out test set (15 % of balanced dataset, 30 K rows, 1:1 class ratio). "
-        "Metrics shown for the **depressed class (label = 1)**."
-    )
 
     # ── Training data ─────────────────────────────────────────────────────────
     st.markdown("<br/>", unsafe_allow_html=True)
