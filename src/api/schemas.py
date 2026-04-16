@@ -8,6 +8,7 @@ class PredictionRequest(BaseModel):
 
     text: str
     model_type: Literal["lr", "distilbert", "mental_roberta", "mentalbert", "xgboost"] = "lr"
+    source_language: str | None = None
 
 
 class PredictionResponse(BaseModel):

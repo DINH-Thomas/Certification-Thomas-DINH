@@ -128,25 +128,28 @@ class TestTranslationFunctions:
         """Translate function should handle empty strings."""
         from src.dashboard.pages import _translate_to_english
 
-        text, note = _translate_to_english("")
+        text, note, language = _translate_to_english("")
         assert text == ""
+        assert language is None
 
     def test_translate_to_english_whitespace_only(self):
         """Translate function should handle whitespace-only strings."""
         from src.dashboard.pages import _translate_to_english
 
-        text, note = _translate_to_english("   \n\t   ")
+        text, note, language = _translate_to_english("   \n\t   ")
         assert text == "   \n\t   "
+        assert language is None
 
     def test_translate_to_english_english_text(self):
         """English text should return unchanged (or return same after translation)."""
         from src.dashboard.pages import _translate_to_english
 
         original = "I feel sad today"
-        text, note = _translate_to_english(original)
+        text, note, language = _translate_to_english(original)
         # After translation, should ideally return same or note about translator
         assert isinstance(text, str)
         assert len(text) > 0
+        assert language is None or isinstance(language, str)
 
 
 class TestDashboardAPIIntegration:

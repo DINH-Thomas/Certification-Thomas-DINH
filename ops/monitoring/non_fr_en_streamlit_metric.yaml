@@ -1,0 +1,8 @@
+name: non_fr_en_streamlit_predict_count
+description: Count of Streamlit-origin /predict requests where detected source language is not French or English.
+filter: |
+  resource.type="cloud_run_revision"
+  resource.labels.service_name="mental-health-api"
+  jsonPayload.event="predict_request"
+  jsonPayload.client_origin="streamlit"
+  jsonPayload.is_non_fr_en=true

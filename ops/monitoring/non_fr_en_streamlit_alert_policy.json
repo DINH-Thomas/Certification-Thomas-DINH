@@ -1,0 +1,33 @@
+{
+  "displayName": "Streamlit non-FR/EN traffic spike",
+  "combiner": "OR",
+  "conditions": [
+    {
+      "displayName": "non-fr-en >= 20 in 20m",
+      "conditionThreshold": {
+        "filter": "metric.type=\"logging.googleapis.com/user/non_fr_en_streamlit_predict_count\" AND resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"mental-health-api\"",
+        "comparison": "COMPARISON_GT",
+        "thresholdValue": 19,
+        "duration": "0s",
+        "aggregations": [
+          {
+            "alignmentPeriod": "1200s",
+            "perSeriesAligner": "ALIGN_SUM"
+          }
+        ],
+        "trigger": {
+          "count": 1
+        }
+      }
+    }
+  ],
+  "documentation": {
+    "content": "Non-FR/EN requests from Streamlit exceeded the configured threshold (20 events over 20 minutes).",
+    "mimeType": "text/markdown"
+  },
+  "enabled": true,
+  "alertStrategy": {
+    "autoClose": "3600s"
+  },
+  "notificationChannels": []
+}
