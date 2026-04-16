@@ -29,5 +29,7 @@
   "alertStrategy": {
     "autoClose": "3600s"
   },
-  "notificationChannels": []
+  "notificationChannels": [
+    "projects/tokyo-bedrock-483613-j3/notificationChannels/15334183556487049970"
+  ]
 }

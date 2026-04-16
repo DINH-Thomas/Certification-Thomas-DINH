@@ -155,6 +155,8 @@ Spécifiez le dossier pour des tests ciblés.
 
 ## Monitoring Cloud Run: alerte langues hors FR/EN
 
+Une alerte a été conçue pour tester les notifications par mail lorsqu'au moins 20 requêtes ont été faites en moins de 20 minutes sur une langue autre que français et anglais.
+
 Le backend émet désormais un log structuré par requête `/predict` avec:
 - `event="predict_request"`
 - `client_origin` (ex: `streamlit`)
