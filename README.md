@@ -152,3 +152,57 @@ Spécifiez le dossier pour des tests ciblés.
 
 **Pipeline**
 - Orchestration de la pipeline complète
+
+## Monitoring Cloud Run: alerte langues hors FR/EN
+
+Le backend émet désormais un log structuré par requête `/predict` avec:
+- `event="predict_request"`
+- `client_origin` (ex: `streamlit`)
+- `source_language` (code détecté, ex: `es`, `fr-fr`, `en-us`)
+- `is_non_fr_en` (`true` si la langue n'est ni française ni anglaise, variantes régionales incluses)
+
+Des fichiers prêts à l'emploi sont fournis:
+- `ops/monitoring/non_fr_en_streamlit_metric.yaml`
+- `ops/monitoring/non_fr_en_streamlit_alert_policy.json`
+
+### 1. Créer (ou mettre à jour) la métrique log-based
+
+```bash
+PROJECT_ID="tokyo-bedrock-483613-j3"
+
+gcloud logging metrics update non_fr_en_streamlit_predict_count \
+	--project "$PROJECT_ID" \
+	--description "Count of Streamlit-origin /predict requests where detected source language is not French or English." \
+	--log-filter='resource.type="cloud_run_revision" AND resource.labels.service_name="mental-health-api" AND jsonPayload.event="predict_request" AND jsonPayload.client_origin="streamlit" AND jsonPayload.is_non_fr_en=true' \
+||
+gcloud logging metrics create non_fr_en_streamlit_predict_count \
+	--project "$PROJECT_ID" \
+	--description "Count of Streamlit-origin /predict requests where detected source language is not French or English." \
+	--log-filter='resource.type="cloud_run_revision" AND resource.labels.service_name="mental-health-api" AND jsonPayload.event="predict_request" AND jsonPayload.client_origin="streamlit" AND jsonPayload.is_non_fr_en=true'
+```
+
+### 2. Créer la policy d'alerte (seuil: 20 événements sur 20 minutes)
+
+Le fichier `ops/monitoring/non_fr_en_streamlit_alert_policy.json` est configuré pour déclencher quand le compteur dépasse 19 (équivalent opérationnel à `>= 20`) sur une fenêtre de 1200 secondes.
+
+```bash
+PROJECT_ID="tokyo-bedrock-483613-j3"
+
+gcloud alpha monitoring policies create \
+	--project "$PROJECT_ID" \
+	--policy-from-file ops/monitoring/non_fr_en_streamlit_alert_policy.json
+```
+
+### 3. Ajouter un canal de notification
+
+La policy est créée avec `notificationChannels: []`.
+Ajoutez ensuite votre canal (email, Slack webhook, PagerDuty...) dans le fichier JSON puis exécutez une mise à jour:
+
+```bash
+PROJECT_ID="tokyo-bedrock-483613-j3"
+POLICY_ID="YOUR_POLICY_ID"
+
+gcloud alpha monitoring policies update "$POLICY_ID" \
+	--project "$PROJECT_ID" \
+	--policy-from-file ops/monitoring/non_fr_en_streamlit_alert_policy.json
+```

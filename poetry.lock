@@ -1689,6 +1689,21 @@ files = [
 ]
 
 [[package]]
+name = "langdetect"
+version = "1.0.9"
+description = "Language detection library ported from Google's language-detection."
+optional = false
+python-versions = "*"
+groups = ["dev"]
+files = [
+    {file = "langdetect-1.0.9-py2-none-any.whl", hash = "sha256:7cbc0746252f19e76f77c0b1690aadf01963be835ef0cd4b56dddf2a8f1dfc2a"},
+    {file = "langdetect-1.0.9.tar.gz", hash = "sha256:cbc1fef89f8d062739774bd51eda3da3274006b3661d199c2655f6b3f6d605a0"},
+]
+
+[package.dependencies]
+six = "*"
+
+[[package]]
 name = "llvmlite"
 version = "0.45.1"
 description = "lightweight wrapper around basic LLVM functionality"
@@ -5357,4 +5372,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.15"
-content-hash = "8c3d36b4975d8b0d5735e7be728db2f4d05cdcbdfe50ad1adcff42a6d9f4ca99"
+content-hash = "cc1bd5c99cce21f5cb603dace3e19c683165218edd456ec3143f4ac9ec93a8f0"

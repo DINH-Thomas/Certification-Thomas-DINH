@@ -1,7 +1,7 @@
 import hashlib
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import Column, DateTime, Float, Integer, String, create_engine, func, select
+from sqlalchemy import Column, DateTime, Float, Integer, String, create_engine, func, inspect, select, text
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from src.config import config
@@ -46,6 +46,7 @@ class PredictionLog(Base):
     label = Column(Integer, nullable=False)
     probability = Column(Float, nullable=False)
     risk_level = Column(String, nullable=False)
+    source_language = Column(String, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
@@ -53,13 +54,32 @@ def init_db() -> None:
     """Create tables if they don't exist. Safe to call on every startup."""
     Base.metadata.create_all(engine)
 
+    # Keep startup backward-compatible on existing DBs where the column may be absent.
+    inspector = inspect(engine)
+    if "prediction_logs" not in inspector.get_table_names():
+        return
+
+    existing_columns = {column["name"] for column in inspector.get_columns("prediction_logs")}
+    if "source_language" in existing_columns:
+        return
+
+    with engine.begin() as connection:
+        connection.execute(text("ALTER TABLE prediction_logs ADD COLUMN source_language VARCHAR"))
+
 
 def hash_text(text: str) -> str:
     """SHA-256 of normalised text — anonymises the input per project policy."""
     return hashlib.sha256(text.strip().lower().encode()).hexdigest()
 
 
-def log_prediction(text: str, model_type: str, label: int, probability: float, risk_level: str) -> None:
+def log_prediction(
+    text: str,
+    model_type: str,
+    label: int,
+    probability: float,
+    risk_level: str,
+    source_language: str | None = None,
+) -> None:
     """Persist one prediction entry. Intended to run as a FastAPI BackgroundTask."""
     try:
         with SessionLocal() as session:
@@ -70,6 +90,7 @@ def log_prediction(text: str, model_type: str, label: int, probability: float, r
                     label=int(label),
                     probability=float(probability),
                     risk_level=risk_level,
+                    source_language=source_language,
                 )
             )
             session.commit()

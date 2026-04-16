@@ -148,6 +148,23 @@ class TestPredictionEndpoint:
         response = client.post("/predict", json=payload)
         assert response.status_code == 200
 
+    def test_predict_passes_normalized_source_language_to_logging(self, client, sample_text_distress, monkeypatch):
+        """Source language should be normalized and passed to the DB logging task."""
+        from src.api import main as api_main
+
+        captured = {}
+
+        def _fake_log_prediction(*args, **kwargs):
+            captured["args"] = args
+            captured["kwargs"] = kwargs
+
+        monkeypatch.setattr(api_main, "log_prediction", _fake_log_prediction)
+
+        payload = {"text": sample_text_distress, "model_type": "lr", "source_language": "ES_ES"}
+        response = client.post("/predict", json=payload, headers={"X-Client-Origin": "streamlit"})
+        assert response.status_code == 200
+        assert captured["args"][-1] == "es-es"
+
 
 class TestExplainEndpoint:
     """Test cases for the /explain endpoint."""
