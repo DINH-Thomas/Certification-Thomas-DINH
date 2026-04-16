@@ -54,7 +54,7 @@ def init_db() -> None:
     """Create tables if they don't exist. Safe to call on every startup."""
     Base.metadata.create_all(engine)
 
-    # Keep startup backward-compatible on existing DBs where the column may be absent.
+    # Keep startup backward-compatible on existing DBs where a column may be absent.
     inspector = inspect(engine)
     if "prediction_logs" not in inspector.get_table_names():
         return
