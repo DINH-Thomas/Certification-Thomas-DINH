@@ -1,4 +1,5 @@
 import sys
+import time
 from pathlib import Path
 
 import requests
@@ -361,30 +362,43 @@ def _render_shell() -> None:
     st.markdown('<div class="app-frame">', unsafe_allow_html=True)
 
 
-def _is_api_reachable(api_url: str) -> bool:
+def _is_api_reachable(api_url: str, timeout: int = 5) -> bool:
     """Check whether the API health endpoint is reachable."""
     try:
-        response = requests.get(f"{api_url}/health", timeout=2)
+        response = requests.get(f"{api_url}/health", timeout=timeout)
         return response.ok
     except requests.exceptions.RequestException:
         return False
 
 
 def _resolve_api_url() -> str:
-    """Use the first reachable endpoint from local and remote candidates."""
-    candidates = [
-        API_URL,
-        API_URL_LOCAL,
-        "http://127.0.0.1:8000",
-        "http://localhost:8000",
-    ]
-    unique_candidates = list(dict.fromkeys(url.strip() for url in candidates if url and url.strip()))
+    """
+    Attends que l'API distante soit disponible (cold start Cloud Run).
+    Réessaie pendant 60 secondes avec un spinner avant d'abandonner.
+    """
+    target = API_URL.strip()
 
-    for url in unique_candidates:
-        if _is_api_reachable(url):
-            return url
+    # Tentative rapide d'abord (API déjà chaude)
+    if _is_api_reachable(target, timeout=5):
+        return target
 
-    return API_URL_LOCAL  # On laisse comme ça pour l'instant
+    # Cold start détecté — on attend avec feedback visuel
+    placeholder = st.empty()
+    max_wait = 60
+    interval = 8
+
+    for elapsed in range(0, max_wait, interval):
+        remaining = max_wait - elapsed
+        placeholder.info(f"⏳ **API en cours de démarrage…** Nouvelle tentative dans {interval}s (timeout dans {remaining}s)")
+        time.sleep(interval)
+        if _is_api_reachable(target, timeout=10):
+            placeholder.success("✅ API connectée !")
+            time.sleep(1)
+            placeholder.empty()
+            return target
+
+    placeholder.error("❌ L'API ne répond pas après 60 secondes. Vérifie que le service Cloud Run est bien déployé.")
+    return target  # On retourne quand même l'URL distante, pas localhost
 
 
 def main() -> None:
