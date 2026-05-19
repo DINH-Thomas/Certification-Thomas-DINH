@@ -402,8 +402,7 @@ def _resolve_api_url() -> str:
 
 
 def main() -> None:
-    """
-    Main entry point for Streamlit dashboard app.
+    """Main entry point for Streamlit dashboard app.
     Resolves API URL, sets up sidebar navigation, and renders selected page."""
     st.set_page_config(
         page_title="Mental Health Signal Detector",
@@ -414,7 +413,11 @@ def main() -> None:
     _inject_theme()
     _render_shell()
 
-    api_url = _resolve_api_url()
+    # Résolution une seule fois par session
+    if "api_url" not in st.session_state:
+        st.session_state.api_url = _resolve_api_url()
+
+    api_url = st.session_state.api_url
 
     # ── Sidebar brand ──────────────────────────────────────────────────────────
     st.sidebar.markdown(
