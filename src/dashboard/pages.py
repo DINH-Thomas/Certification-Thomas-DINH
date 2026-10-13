@@ -2,6 +2,7 @@ import importlib
 import logging
 import os
 import re
+from collections.abc import Callable
 
 import requests
 import streamlit as st
@@ -54,20 +55,46 @@ def _split_text(text: str, limit: int = MAX_CHUNK_CHARS) -> list[str]:
     return chunks
 
 
-def _build_translator_factories(source: str) -> list[tuple[str, callable]] | None:
+def _mymemory_code(lang: str | None) -> str | None:
+    """Convert a short code ('fr', 'zh-cn') to MyMemory's format ('fr-FR', 'zh-CN')."""
+    if not lang:
+        return None
+    try:
+        from deep_translator.constants import MY_MEMORY_LANGUAGES_TO_CODES
+    except ImportError:
+        return None
+
+    codes = list(MY_MEMORY_LANGUAGES_TO_CODES.values())
+    wanted = lang.lower()
+    for code in codes:  # correspondance exacte (ex. zh-CN)
+        if code.lower() == wanted:
+            return code
+    for code in codes:  # sinon, même langue (fr -> fr-FR)
+        if code.split("-")[0].lower() == wanted.split("-")[0]:
+            return code
+    return None
+
+
+def _build_translator_factories(source: str) -> list[tuple[str, Callable]] | None:
     """Return (name, factory) pairs in fallback order, or None if deep_translator is missing."""
     try:
         dt = importlib.import_module("deep_translator")
     except ImportError:
         return None
 
-    factories = []
+    factories: list[tuple[str, Callable]] = []
 
-    mymemory_kwargs = {"source": source, "target": "en"}
-    if os.getenv("MYMEMORY_EMAIL"):  # relève le quota quotidien
-        mymemory_kwargs["email"] = os.environ["MYMEMORY_EMAIL"]
-    factories.append(("MyMemory", lambda: dt.MyMemoryTranslator(**mymemory_kwargs)))
+    # 1) MyMemory (gratuit, nécessite des codes de langue complets : fr-FR, en-GB)
+    source_code = _mymemory_code(source)
+    if source_code:
+        mymemory_kwargs = {"source": source_code, "target": "en-GB"}
+        if os.getenv("MYMEMORY_EMAIL"):  # relève le quota quotidien
+            mymemory_kwargs["email"] = os.environ["MYMEMORY_EMAIL"]
+        factories.append(("MyMemory", lambda: dt.MyMemoryTranslator(**mymemory_kwargs)))
+    else:
+        logger.warning("No MyMemory language code for %r, skipping MyMemory", source)
 
+    # 2) LibreTranslate (optionnel, seulement si un serveur est configuré)
     if os.getenv("LIBRETRANSLATE_URL"):
         factories.append(
             (
@@ -81,7 +108,9 @@ def _build_translator_factories(source: str) -> list[tuple[str, callable]] | Non
             )
         )
 
+    # 3) Google en dernier recours (souvent bloqué depuis les IP de datacenters)
     factories.append(("Google", lambda: dt.GoogleTranslator(source="auto", target="en")))
+
     return factories
 
 
