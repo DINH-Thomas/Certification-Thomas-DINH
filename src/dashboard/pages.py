@@ -1,12 +1,22 @@
 import importlib
+import logging
+import os
+import re
 
 import requests
 import streamlit as st
 
 from src.dashboard.examples import render_examples
 
-GoogleTranslator = None
+logger = logging.getLogger(__name__)
+
 detect_language = None
+TRANSLATION_SUCCESS_NOTE = "Input was auto-translated to English before analysis."
+TRANSLATION_FAILED_NOTE = "Automatic translation failed: the text was analyzed in its original language, so the result may be unreliable."
+TRANSLATION_UNAVAILABLE_NOTE = (
+    "Translator unavailable (`deep-translator` not installed): the text was analyzed in its original language, so the result may be unreliable."
+)
+MAX_CHUNK_CHARS = 450  # MyMemory refuse > 500 caractères par requête
 TRANSLATION_SUCCESS_NOTE = "Input was auto-translated to English before analysis."
 MODEL_OPTIONS = ["lr", "xgboost", "distilbert", "mental_roberta"]
 MODEL_DISPLAY_NAMES = {
@@ -22,6 +32,110 @@ DEMO_SENTENCES = {
 }
 
 
+def _split_text(text: str, limit: int = MAX_CHUNK_CHARS) -> list[str]:
+    """Split text into chunks below `limit` chars, preferably on sentence boundaries."""
+    chunks: list[str] = []
+    current = ""
+    for sentence in re.split(r"(?<=[.!?])\s+", text):
+        while len(sentence) > limit:
+            if current:
+                chunks.append(current)
+                current = ""
+            chunks.append(sentence[:limit])
+            sentence = sentence[limit:]
+        if len(current) + len(sentence) + 1 <= limit:
+            current = f"{current} {sentence}".strip()
+        else:
+            if current:
+                chunks.append(current)
+            current = sentence
+    if current:
+        chunks.append(current)
+    return chunks
+
+
+def _build_translator_factories(source: str) -> list[tuple[str, callable]] | None:
+    """Return (name, factory) pairs in fallback order, or None if deep_translator is missing."""
+    try:
+        dt = importlib.import_module("deep_translator")
+    except ImportError:
+        return None
+
+    factories = []
+
+    mymemory_kwargs = {"source": source, "target": "en"}
+    if os.getenv("MYMEMORY_EMAIL"):  # relève le quota quotidien
+        mymemory_kwargs["email"] = os.environ["MYMEMORY_EMAIL"]
+    factories.append(("MyMemory", lambda: dt.MyMemoryTranslator(**mymemory_kwargs)))
+
+    if os.getenv("LIBRETRANSLATE_URL"):
+        factories.append(
+            (
+                "LibreTranslate",
+                lambda: dt.LibreTranslator(
+                    source="auto",
+                    target="en",
+                    base_url=os.environ["LIBRETRANSLATE_URL"],
+                    api_key=os.getenv("LIBRETRANSLATE_API_KEY", ""),
+                ),
+            )
+        )
+
+    factories.append(("Google", lambda: dt.GoogleTranslator(source="auto", target="en")))
+    return factories
+
+
+def _translate_with(translator, text: str) -> str:
+    """Translate text chunk by chunk and reject empty or quota-error outputs."""
+    parts = []
+    for chunk in _split_text(text):
+        result = translator.translate(chunk)
+        if not result or result.upper().startswith("MYMEMORY WARNING"):
+            raise ValueError(f"Unusable translation output: {result!r}")
+        parts.append(result)
+    return " ".join(parts)
+
+
+def _translate_to_english(text: str) -> tuple[str, str | None, str | None]:
+    """Translate text to English; return (text, note, detected_language)."""
+    cleaned = text.strip()
+    if not cleaned:
+        return text, None, None
+
+    detected_language = _detect_source_language(cleaned)
+    if detected_language == "en":
+        return text, None, detected_language  # rien à traduire
+
+    factories = _build_translator_factories(detected_language or "auto")
+    if factories is None:
+        return text, TRANSLATION_UNAVAILABLE_NOTE, detected_language
+
+    for name, factory in factories:
+        try:
+            translated = _translate_with(factory(), cleaned)
+        except Exception:
+            logger.exception("Translation failed with %s", name)
+            continue
+
+        if translated.strip().lower() != cleaned.lower():
+            return translated, TRANSLATION_SUCCESS_NOTE, detected_language
+        return text, None, detected_language
+
+    return text, TRANSLATION_FAILED_NOTE, detected_language
+
+
+def _render_translation_feedback(translation_note: str | None) -> None:
+    """Info when translation worked, warning when it failed."""
+    if not translation_note:
+        return
+
+    if translation_note == TRANSLATION_SUCCESS_NOTE:
+        st.info(translation_note)
+        st.caption("Prediction is based on translated English text")
+    else:
+        st.warning(translation_note)
+
+
 def _render_demo_sentence_picker(text_key: str, key_prefix: str) -> None:
     """Render controls to copy one of the predefined demo sentences into a text area."""
     selected_demo = st.selectbox(
@@ -31,20 +145,6 @@ def _render_demo_sentence_picker(text_key: str, key_prefix: str) -> None:
     )
     if st.button("Use selected demo sentence", key=f"{key_prefix}_demo_apply"):
         st.session_state[text_key] = DEMO_SENTENCES[selected_demo]
-
-
-def _get_google_translator():
-    """Return GoogleTranslator class if deep_translator is installed, else None."""
-    global GoogleTranslator
-    if GoogleTranslator is not None:
-        return GoogleTranslator
-
-    try:
-        deep_translator_module = importlib.import_module("deep_translator")
-        GoogleTranslator = deep_translator_module.GoogleTranslator
-        return GoogleTranslator
-    except ImportError:
-        return None
 
 
 def _get_language_detector():
@@ -74,42 +174,6 @@ def _detect_source_language(text: str) -> str | None:
 
     normalized = detected.strip().lower().replace("_", "-")
     return normalized or None
-
-
-def _translate_to_english(text: str) -> tuple[str, str | None, str | None]:
-    """Translate text to English and return translated text, note, and detected source language."""
-    cleaned = text.strip()
-    if not cleaned:
-        return text, None, None
-
-    detected_language = _detect_source_language(cleaned)
-
-    translator_cls = _get_google_translator()
-    if translator_cls is None:
-        return text, "Translator unavailable (`deep-translator` not installed). Original text was used.", detected_language
-
-    try:
-        translated = translator_cls(source="auto", target="en").translate(cleaned)
-    except Exception:
-        return text, "Automatic translation failed. Original text was used.", detected_language
-
-    if not translated:
-        return text, "Automatic translation returned empty output. Original text was used.", detected_language
-
-    if translated.strip().lower() != cleaned.lower():
-        return translated, TRANSLATION_SUCCESS_NOTE, detected_language
-
-    return text, None, detected_language
-
-
-def _render_translation_feedback(translation_note: str | None) -> None:
-    """Render translation info and caption when translation was applied."""
-    if not translation_note:
-        return
-
-    st.info(translation_note)
-    if translation_note == TRANSLATION_SUCCESS_NOTE:
-        st.caption("Prediction is based on translated English text")
 
 
 def _render_hero(mode: str) -> None:
